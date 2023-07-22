@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\Restaurant_Reservation_Management_System_Api.props" />
+</Project>
