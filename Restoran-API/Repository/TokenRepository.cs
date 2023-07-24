@@ -189,7 +189,7 @@ namespace Restaurant_Reservation_Management_System_Api.Repository
 				issuer: _configuration["Jwt:Issuer"],
 				audience: _configuration["Jwt:Audience"],
 				claims: claims,
-				expires: DateTime.Now.AddHours(1),
+				expires: DateTime.Now.AddDays(7),
 				signingCredentials: credentials
 				);
 			//var tokenHandler = new JwtSecurityTokenHandler();

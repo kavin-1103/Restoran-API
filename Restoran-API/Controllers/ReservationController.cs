@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,22 +29,13 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
             _reservationServices = reservationServices;
         }
 
-		//[HttpPost]
-		//[Route("Tables")]
-
-		//public async Task<ActionResult<ServiceResponse<List<GetTableDtoUser>>>> GetAvailableTables(GetReservationDetailsForTableDtoUser getReservationDetailsForTableDtoUser)
-		//{
-		//	var response = await _reservationServices.GetAvailableTables(getReservationDetailsForTableDtoUser);
-
-		//	if (response.Success == false)
-		//	{
-		//		return BadRequest(response);
-		//	}
-		//	return Ok(response);
-		//}
+		
 
 		[HttpPost]
 		[Route("Tables")]
+		[Authorize(Roles = "Customer")]
+
+		//endpoint to get the avilable tables
 
 		public async Task<ActionResult<ServiceResponse<List<TableAvailability>>>> GetAvailableTables(GetAvailableTablesDto getReservationDetailsForTableDtoUser)
 		{
@@ -56,6 +48,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 			return Ok(response);
 		}
 		[HttpPost("ReserveTable")]
+		[Authorize(Roles = "Customer")]
+
+		//endpoint to reserve the table
 		public async Task<ActionResult<ServiceResponse<Reservation>>> ReserveTable(CreateReservationDtoUser createReservationDtoUser)
 		{
 
@@ -67,52 +62,24 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 			var customerId = customerIdClaim.Value;
 
 			var response = await _reservationServices.ReserveTable(customerId,createReservationDtoUser);
-			//if (!response.Success)
-			//{
-			//    return BadRequest(response);
-			//}
+			
 
 			return Ok(response);
 		}
 
-		// GET: api/Reservations
-		//[HttpGet]
-		//public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
-		//{
-		//  if (_context.Reservations == null)
-		//  {
-		//      return NotFound();
-		//  }
-		//    return await _context.Reservations.ToListAsync();
-		//}
-
-
-		// GET: api/Reservations/5
-		//[HttpGet("{id}")]
-		//public async Task<ActionResult<Reservation>> GetReservation(int id)
-		//{
-		//  if (_context.Reservations == null)
-		//  {
-		//      return NotFound();
-		//  }
-		//    var reservation = await _context.Reservations.FindAsync(id);
-
-		//    if (reservation == null)
-		//    {
-		//        return NotFound();
-		//    }
-
-		//    return reservation;
-		//}
-
-		// PUT: api/Reservations/5
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		
+		
+	
+		
 
 
 		// POST: api/Reservations
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		
 		[HttpPost]
-        public async Task<ActionResult<GetReservationDtoUser>> PostReservation(CreateReservationDtoUser createReservationDtoUser)
+		[Authorize(Roles = "Customer")]
+
+		//endpoint to add new reservation
+		public async Task<ActionResult<GetReservationDtoUser>> PostReservation(CreateReservationDtoUser createReservationDtoUser)
         {
 
             var response = await _reservationServices.PostReservation(createReservationDtoUser);
@@ -128,7 +95,10 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 
         // DELETE: api/Reservations/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ServiceResponse<string>>> DeleteReservation(int id)
+		[Authorize(Roles = "Customer")]
+
+		//endpoint to delete the reservation
+		public async Task<ActionResult<ServiceResponse<string>>> DeleteReservation(int id)
         {
             var response = await _reservationServices.DeleteReservation(id);
 

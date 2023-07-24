@@ -29,8 +29,10 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers
 
         // GET: api/MenuCategoriesControllerAdmin
         [HttpGet]
+		[Authorize(Roles = "Admin, Customer")]
 
-        public async Task<ActionResult<IEnumerable<GetMenuCategoryDtoAdmin>>> GetMenuCategories()
+        //endpoint to get all menu category
+		public async Task<ActionResult<IEnumerable<GetMenuCategoryDtoAdmin>>> GetMenuCategories()
         {
             var response = await _menuCategoryServices.GetMenuCategory();
             if (response.Success == false)
@@ -43,7 +45,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers
 
         // GET: api/MenuCategoriesControllerAdmin/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MenuCategory>> GetMenuCategory(int id)
+
+		//endpoint to get menu category by id
+		public async Task<ActionResult<MenuCategory>> GetMenuCategory(int id)
         {
             if (_context.MenuCategories == null)
             {
@@ -60,9 +64,12 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers
         }
 
         // PUT: api/MenuCategoriesControllerAdmin/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPut("{id}")]
-        public async Task<ActionResult<ServiceResponse<GetMenuCategoryDtoAdmin>>> UpdateMenuCategory(int id, AddMenuCategoryDtoAdmin addMenuCategoryDtoAdmin)
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to update the  menu category
+		public async Task<ActionResult<ServiceResponse<GetMenuCategoryDtoAdmin>>> UpdateMenuCategory(int id, AddMenuCategoryDtoAdmin addMenuCategoryDtoAdmin)
         {
             var response = await _menuCategoryServices.UpdateMenuCategory(id, addMenuCategoryDtoAdmin);
 
@@ -76,9 +83,12 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers
         }
 
         // POST: api/MenuCategoriesControllerAdmin
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<IEnumerable<GetMenuCategoryDtoAdmin>>>> AddMenuCategory(AddMenuCategoryDtoAdmin addMenuCategoryDtoAdmin)
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to  add new menu category
+		public async Task<ActionResult<ServiceResponse<IEnumerable<GetMenuCategoryDtoAdmin>>>> AddMenuCategory(AddMenuCategoryDtoAdmin addMenuCategoryDtoAdmin)
         {
 
             var response = await _menuCategoryServices.AddMenuCategory(addMenuCategoryDtoAdmin);
@@ -89,19 +99,15 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers
             }
 
             return Ok(response);
-            //if (_context.MenuCategories == null)
-            //{
-            //    return Problem("Entity set 'RestaurantDbContext.MenuCategories'  is null.");
-            //}
-            //  _context.MenuCategories.Add(menuCategory);
-            //  await _context.SaveChangesAsync();
-
-            //  return CreatedAtAction("GetMenuCategory", new { id = menuCategory.MenuCategoryId }, menuCategory);
+            
         }
 
         // DELETE: api/MenuCategoriesControllerAdmin/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ServiceResponse<string>>> DeleteMenuCategory(int id)
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to Delete the menu category by id
+		public async Task<ActionResult<ServiceResponse<string>>> DeleteMenuCategory(int id)
         {
             var response = await _menuCategoryServices.DeleteMenuCategory(id);
 

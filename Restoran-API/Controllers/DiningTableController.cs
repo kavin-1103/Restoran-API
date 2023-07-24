@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,10 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
         // GET: api/Tables
         [HttpGet]
+
+
+        //endpoint to get all the dining tables
+
         public async Task<ActionResult<ServiceResponse<IEnumerable<GetAllTableDtoAdmin>>>> GetTables()
         {
 
@@ -40,16 +45,14 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
             return Ok(response);
 
 
-            //if (_context.Tables == null)
-            //{
-            //    return NotFound();
-            //}
-            //  return await _context.Tables.ToListAsync();
+          
         }
 
         // GET: api/Tables/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Table>> GetTable(int id)
+
+		//endpoint to get all the dining tables by id
+		public async Task<ActionResult<Table>> GetTable(int id)
         {
             if (_context.Tables == null)
             {
@@ -67,9 +70,13 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
       
         // PUT: api/Tables/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+      
         [HttpPut("{id}")]
-        public async Task<ActionResult<ServiceResponse<GetAllTableDtoAdmin>>> UpdateTable(int id , AddTableDtoAdmin addTableDtoAdmin)
+
+        [Authorize(Roles ="Admin")]
+
+		//endpoint to get update the dining table
+		public async Task<ActionResult<ServiceResponse<GetAllTableDtoAdmin>>> UpdateTable(int id , AddTableDtoAdmin addTableDtoAdmin)
         {
 
             var response = await _tableServices.UpdateTable(id,addTableDtoAdmin);
@@ -84,9 +91,14 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
         }
 
         // POST: api/Tables
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<List<GetAllTableDtoAdmin>>>> AddTable(AddTableDtoAdmin addTableDtoAdmin)
+
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to add  the dining tables
+
+		public async Task<ActionResult<ServiceResponse<List<GetAllTableDtoAdmin>>>> AddTable(AddTableDtoAdmin addTableDtoAdmin)
         {
 
             var response = await _tableServices.AddTable(addTableDtoAdmin);
@@ -98,19 +110,16 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
             return Ok(response);
 
-            //if (_context.Tables == null)
-            //{
-            //    return Problem("Entity set 'RestaurantDbContext.Tables'  is null.");
-            //}
-            //_context.Tables.Add(table);
-            //await _context.SaveChangesAsync();
-
-            //return CreatedAtAction("GetTable", new { id = table.TableId }, table);
+          
         }
 
         // DELETE: api/Tables/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ServiceResponse<string>>> DeleteTable(int id)
+
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to delete the dining tables
+		public async Task<ActionResult<ServiceResponse<string>>> DeleteTable(int id)
         {
 
             var response = await _tableServices.DeleteTable(id);
@@ -128,6 +137,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
 		[HttpGet]
 		[Route("total-table-count")]
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to get the  count
 		public async Task<ActionResult<ServiceResponse<int>>> GetTotalTableCount()
 		{
 			var response = await _tableServices.GetTotalTableCount();

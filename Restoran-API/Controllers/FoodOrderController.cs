@@ -21,7 +21,7 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
     public class FoodOrderController : ControllerBase
     {
         private readonly RestaurantDbContext _context;
-      //  private readonly UserManager<ApplicationUser> _userManager;
+      
 
 
         private readonly IOrderServicesUser _orderServiceUser;
@@ -30,13 +30,15 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
         {
             _context = context;
             _orderServiceUser = orderServicesUser;
-           // _userManager = userManager;
+           
         }
 
        
         // GET: api/OrdersControllerUser
         [HttpGet]
         [Authorize(Roles ="Customer")]
+
+        //endpoint for getting the order of a particular customer
         public async Task<ActionResult<IEnumerable<GetOrderDtoUser>>> GetOrders()
         {
             var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -52,16 +54,15 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
                 return BadRequest(response);
             }
             return Ok(response);    
-              //if (_context.Orders == null)
-              //{
-              //    return NotFound();
-              //}
-              //  return await _context.Orders.ToListAsync();
+              
         }
 
         [HttpGet]
         [Route("GetAllOrders")]
-        public async Task<ActionResult<ServiceResponse<IEnumerable<GetAllOrderDto>>>> GetAllOrders()
+		[Authorize(Roles = "Admin")]
+
+        //endpoint to get all the orders
+		public async Task<ActionResult<ServiceResponse<IEnumerable<GetAllOrderDto>>>> GetAllOrders()
         {
             var response = await _orderServiceUser.GetAllOrders();
             if(!response.Success)
@@ -73,6 +74,8 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 
         // GET: api/OrdersControllerUser/5
         [HttpGet("{id}")]
+
+        //endpoint to get the order by id
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
           if (_context.Orders == null)
@@ -90,8 +93,11 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
         }
 
         // PUT: api/OrdersControllerUser/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}")]
+
+
+        //endpoint to change the order
         public async Task<IActionResult> PutOrder(int id, Order order)
         {
             if (id != order.OrderId)
@@ -121,7 +127,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
         }
 
         // POST: api/OrdersControllerUser
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
+        //endpoint to add a new order
+       
         [HttpPost]
         [Authorize(Roles = "Customer")]
         public async Task<ActionResult<ServiceResponse<GetOrderDtoUser>>> AddOrder(AddOrderDtoUser addOrderDtoUser)
@@ -145,6 +153,8 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 
         // DELETE: api/OrdersControllerUser/5
         [HttpDelete("{id}")]
+
+        //endpoint to delete the order
         public async Task<IActionResult> DeleteOrder(int id)
         {
             if (_context.Orders == null)
@@ -166,6 +176,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 
 		[HttpGet]
 		[Route("GetOrderCountForLast7Days")]
+		[Authorize(Roles = "Admin")]
+
+        //endpoint to get the Order for last seven days
 		public async Task<IActionResult> GetOrderCountForLast7Days()
 		{
 			var response = await _orderServiceUser.GetOrderCountForLast7Days();
@@ -189,6 +202,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
         }
 
 		[HttpGet("total-order-count")]
+		[Authorize(Roles = "Admin")]
+
+        //endpoint to get the total order count
 		public async Task<IActionResult> GetTotalOrderCount()
 		{
 			var response = await _orderServiceUser.GetTotalOrderCount();
@@ -206,6 +222,7 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.UserControlle
 		[Route("GetOrdersOfCustomer")]
 		[Authorize(Roles = "Customer")]
 
+        //endpoint to get the all the orders of a particular customer
 		public async Task<IActionResult> GetOrdersForCustomer()
 		{
 			// Get the currently logged-in user's Id from the ClaimsPrincipal

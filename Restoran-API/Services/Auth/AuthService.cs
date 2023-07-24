@@ -47,6 +47,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				return response;
 			}
 
+			//finding the user with the email
 			var ExistingEmail = await _userManager.FindByEmailAsync(registerRequestDto.Email);
 
 			if (ExistingEmail != null)
@@ -64,6 +65,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				PhoneNumber = registerRequestDto.PhoneNumber,
 			};
 
+			//creating new application user with hashed password
+
 			var passwordHashed = await _userManager.CreateAsync(user, registerRequestDto.Password);
 
 			await _userManager.AddToRoleAsync(user, "Customer");
@@ -73,6 +76,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 
 			DateTimeOffset indianTime = DateTimeOffset.UtcNow.ToOffset(TimeZoneInfo.FindSystemTimeZoneById("India Standard Time").BaseUtcOffset);
 			DateTimeOffset otpExpiration = indianTime.AddDays(1);
+
+			//added time for otp expiration
 
 			user.Otp = otp;
 			user.OtpExpiration = otpExpiration;
@@ -85,7 +90,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 					 "Please use this OTP to complete the registration process." + "\n\n" +
 					 "Best regards,\n" +
 					 "Restoran");
-
+			//sending email to the customer
 
 			_emailSender.SendEmail(employeeMessage);
 
@@ -94,132 +99,12 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 			return response;
 	
 
-		//}
-		//catch (Exception ex)
-		//{
-
-		//}
-
-		//         if(Verify())
-		//         {
-		//	try
-		//	{
-		//		var user = new ApplicationUser
-		//		{
-		//			UserName = registerRequestDto.Name,
-		//			Name = registerRequestDto.Name,
-		//			Email = registerRequestDto.Email,
-		//			PhoneNumber = registerRequestDto.PhoneNumber,
 
 
-
-		//		};
-		//		var passHashed = await _userManager.CreateAsync(user, registerRequestDto.Password);
-
-		//		if (passHashed.Succeeded)
-		//		{
-		//			await _userManager.AddToRoleAsync(user, "Customer");
-		//		}
-
-		//		//Store in Registered Customer Table 
-
-		//		StoreInRegisteredCustomer(user);
-
-
-
-
-
-
-		//		await _context.Users.AddAsync(user);
-
-
-
-		//		await _context.SaveChangesAsync();
-
-
-
-		//		response.Data = "User Registered Successfully";
-		//		return response;
-		//	}
-
-
-		//	catch (Exception ex)
-		//	{
-		//		// Handle exception if needed
-
-		//		response.Success = false;
-		//		response.Message = "An error occurred during registration.";
-		//		return response;
-		//	}
-		//}
-
-
-
-
-
-
-
-
-		//-----
-		//var user = new ApplicationUser
-		//         {
-		//             UserName = registerRequestDto.Name,
-		//             Name = registerRequestDto.Name ,
-		//             Email = registerRequestDto.Email ,
-		//             PhoneNumber = registerRequestDto.PhoneNumber,
-
-
-
-		//         };
-		//         var result = await _userManager.CreateAsync(user,registerRequestDto.Password);
-
-		//         if(result.Succeeded)
-		//         {
-		//             await _userManager.AddToRoleAsync(user, "Customer");
-		//         }
-
-		//         //Store in Registered Customer Table 
-
-		//         StoreInRegisteredCustomer(user);
-
-		//         return result;
-
-
+		
 	}
 
-	//public async Task<LoginResponseDto> LoginUserAsync(LoginRequestDto loginRequestDto)
-	//{
-
-
-	//    //Check Email
-	//    var identityUser = await _userManager.FindByEmailAsync(loginRequestDto.Email);
-
-	//    if(identityUser is not null)
-	//    {
-	//        //Check Password
-
-	//        var checkPasswordResult = await _userManager.CheckPasswordAsync(identityUser, loginRequestDto.Password);
-
-	//        if(checkPasswordResult)
-	//        {
-	//            var roles = await _userManager.GetRolesAsync(identityUser);
-
-	//            //Create a Toeken and Response
-
-	//            var jwtToken = _tokenRepository.CreateJwtToken(identityUser, roles.ToList());
-	//            var response = new LoginResponseDto()
-	//            {
-	//                Email = loginRequestDto.Email,
-	//                Roles = roles.ToList(),
-	//                Token = "TOKEN" ,
-
-	//            };      
-
-
-
-	//        }
-
-	//    }
+	//method to store in register customer model
 
 	private async Task StoreInRegisteredCustomer(ApplicationUser user)
         {
@@ -237,6 +122,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
             
         }
 
+		//method to verify the email
 
 		public async Task<ServiceResponse<string>> EmailVerification(EmailVerificationDto emailVerificationDto)
 		{
@@ -249,6 +135,9 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				response.Message = "User Already Exist";
 
 			}
+
+			//generating the otp 
+
 			OtpGenerator otpGenerator = new OtpGenerator();
 
 			string otp = otpGenerator.GenerateOtp();
@@ -277,6 +166,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 			return response;
 		}
 
+		//method to retrieve the password
 		public async Task<ServiceResponse<string>> ForgotPassword(string email)
         {
             var response = new ServiceResponse<string>();
@@ -288,24 +178,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
                 response.Message = "User not found";
                 return response;
             }
-            //if (!IsEmailValid(email))
-            //{
-            //	response.Success = false;
-            //	response.Message = "Invalid email address.";
-            //	return response;
-            //}
-            //if (!await EmailExists(email))
-            //{
-            //	response.Success = false;
-            //	response.Message = "Email does not exists";
-            //	return response;
-            //}
-            //if (user.IsVerified == false)
-            //{
-            //    response.Success = false;
-            //    response.Message = "User Not Verified";
-            //    return response;
-            //}
+           
 
 		
 
@@ -350,10 +223,12 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				{
 					if (user.OtpExpiration > DateTimeOffset.UtcNow)
 					{
-						//await StoreInRegisteredCustomer(user);
+						await StoreInRegisteredCustomer(user);
 						user.Otp = null;
 						user.OtpExpiration = null;
 						user.IsVerified = true;
+
+
 						await _context.SaveChangesAsync();
 						response.Success = true;
 						response.Message = "OTP verification successful.";
@@ -389,6 +264,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 			return response;
 		}
 
+		//method to reset the password
 		public async Task<ServiceResponse<string>> ResetPassword(PasswordChangeDto passswordChangeDto)
 		{
 			var serviceResponse = new ServiceResponse<string>();
@@ -427,61 +303,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 		}
 
 
-		//public async Task<ServiceResponse<string>> Verify(string email, string otp)
-		//{
-		//	ServiceResponse<string> response = new ServiceResponse<string>();
+		
 
-		//	if (!IsEmailValid(email))
-		//	{
-		//		response.Success = false;
-		//		response.Message = "Invalid email address.";
-		//		return response;
-		//	}
-		//	var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email!.ToLower() == email.ToLower());
-		//	if (user != null)
-		//	{
-		//		if (user.OtpResendCount >= 3)
-		//		{
-		//			response.Success = false;
-		//			response.Message = "Maximum OTP resend limit reached.";
-		//			return response;
-		//		}
-		//		if (user.Otp == otp)
-		//		{
-
-		//			if (user.OtpExpiration > DateTimeOffset.UtcNow)
-		//			{
-		//				user.Otp = null;
-		//				user.IsVerified = true;
-		//				await _dbContext.SaveChangesAsync();
-		//				response.Success = true;
-		//				response.Message = "OTP verification successful.";
-		//				return response;
-		//			}
-		//			else
-		//			{
-		//				response.Success = false;
-		//				response.Message = "Your Otp has been expired , Please try again";
-		//			}
-		//		}
-		//		else
-		//		{
-		//			response.Success = false;
-		//			response.Message = "Invalid OTP , Please try again";
-
-		//		}
-
-		//	}
-		//	else
-		//	{
-
-		//		response.Success = false;
-		//		response.Message = "Invalid Email , Please try again";
-
-		//	}
-
-		//	return response;
-		//}
 
 		private bool IsEmailValid(string email)
 		{

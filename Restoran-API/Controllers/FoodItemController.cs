@@ -33,6 +33,7 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
         // GET: api/FoodItemsControllerAdmin
         [HttpGet]
         
+        //endpoint to get all the food items
         public async Task<ActionResult<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>>> GetFoodItems()
         {
             var response = await _foodItemServicesAdmin.GetFoodItems();
@@ -48,7 +49,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
         // GET: api/FoodItemsControllerAdmin/5
         [HttpGet("{id}")]
         [Authorize(Roles ="Admin")]
-        public async Task<ActionResult<FoodItem>> GetFoodItem(int id)
+
+		//endpoint to get  the food items by id
+		public async Task<ActionResult<FoodItem>> GetFoodItem(int id)
         {
           if (_context.FoodItems == null)
           {
@@ -65,9 +68,13 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
         }
 
         // PUT: api/FoodItemsControllerAdmin/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPut("{id}")]
-        public async Task<ActionResult<ServiceResponse<GetFoodItemDtoAdmin>>> UpdateFoodItem(int id, AddFoodItemDtoAdmin addFoodItemDtoAdmin)
+
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to update the food items
+		public async Task<ActionResult<ServiceResponse<GetFoodItemDtoAdmin>>> UpdateFoodItem(int id, AddFoodItemDtoAdmin addFoodItemDtoAdmin)
         {
             var response = await _foodItemServicesAdmin.UpdateFoodItem(id, addFoodItemDtoAdmin);
             if(response.Success == false)
@@ -78,9 +85,13 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
         }
 
         // POST: api/FoodItemsControllerAdmin
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>>> AddFoodItem(AddFoodItemDtoAdmin addFoodItemDtoAdmin)
+
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to  add the food item
+		public async Task<ActionResult<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>>> AddFoodItem(AddFoodItemDtoAdmin addFoodItemDtoAdmin)
         {
 
 
@@ -94,8 +105,12 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
         // DELETE: api/FoodItemsControllerAdmin/5
         [HttpDelete("{id}")]
-        
-        public async Task<ActionResult<ServiceResponse<string>>> DeleteFoodItem(int id)
+
+		[Authorize(Roles = "Admin")]
+
+		//endpoint to Delete the food item
+
+		public async Task<ActionResult<ServiceResponse<string>>> DeleteFoodItem(int id)
         {
             var response = await _foodItemServicesAdmin.DeleteFoodItem(id);
             if(response.Success==false)
@@ -108,9 +123,11 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
         [HttpGet]
         [Route("CountFoodItems")]
-       // [Authorize(Roles ="Admin")]
+		
+		[Authorize(Roles = "Admin")]
 
-        public async Task<ActionResult<ServiceResponse<int>>> GetFoodItemsCount()
+        //method to get count of food item
+		public async Task<ActionResult<ServiceResponse<int>>> GetFoodItemsCount()
         {
             var response = await _foodItemServicesAdmin.GetFoodItemsCount();
 
@@ -125,6 +142,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AdminControll
 
 		[HttpGet]
 		[Route("GetFoodItemByCategory")]
+		[Authorize(Roles = "Admin,Customer")]
+
+		//endpoint to get all the food items by category
 		public async Task<ActionResult<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>>> GetFoodItemByCategory(int id)
 		{
 			var response = await _foodItemServicesAdmin.GetFoodItemByCategory(id);
