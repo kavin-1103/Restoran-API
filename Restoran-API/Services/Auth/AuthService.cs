@@ -86,6 +86,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				user.Otp = otp;
 				user.OtpExpiration = otpExpiration;
 
+				await StoreInRegisteredCustomer(user);
+
 				// Save the changes to the database
 				await _context.SaveChangesAsync();
 
@@ -106,7 +108,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 			{
 				// Handle the exception for duplicate UserName
 				response.Success = false;
-				response.Message = "Username already exists"+ex.Message;
+				response.Message = "Username already exists";
 				return response;
 			}
 
@@ -131,7 +133,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
             };
             _context.RegisteredCustomers.Add(registeredCustomer);
 
-            await _context.SaveChangesAsync();
+           // await _context.SaveChangesAsync();
             
         }
 
@@ -236,7 +238,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 				{
 					if (user.OtpExpiration > DateTimeOffset.UtcNow)
 					{
-						await StoreInRegisteredCustomer(user);
+						//await StoreInRegisteredCustomer(user);
 						user.Otp = null;
 						user.OtpExpiration = null;
 						user.IsVerified = true;
