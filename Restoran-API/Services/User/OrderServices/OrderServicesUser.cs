@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Globalization;
 using Restaurant_Reservation_Management_System_Api.Dto.Auth;
 using EmailService;
+using System.Text;
 
 namespace Restaurant_Reservation_Management_System_Api.Services.User.OrderServices
 {
@@ -40,9 +41,6 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.OrderServic
 
             var customerId = customerIdClaim;
 
-
-           
-
              
                 if (customerIdClaim == null)
                 {
@@ -66,7 +64,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.OrderServic
                 //finding the user with id
 			    var applicationUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == customerId);
 
-            //getting the table with id
+                //getting the table with id
 			    var table = await _context.Tables.FirstOrDefaultAsync(t => t.TableId == order.TableId);
 
 
@@ -106,18 +104,26 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.OrderServic
                 serviceResponse.Success = true;
 			    serviceResponse.Message = "Ordered Successfully";
 
-                
-               //message to display in email
-			    var employeeMessage = new Message(new string[] { applicationUser.Email }, "Registration Successfull", "\n\n" +
-						     "Thank you for registering with 'RESTORAN' We are delighted to welcome you to our platform!" + "\n\n" +
-						     "If you have any questions or need assistance, please don't hesitate to reach out to us." + "\n\n" +
-						     "Best regards,\n" +
-						     "Restoran");
-                //sending email to the registered customer
+			var orderedTable = await _context.Tables.FirstOrDefaultAsync(t=>t.TableId == addOrderDtoUser.TableId);
 
-			    _emailSender.SendEmail(employeeMessage);
+			var orderedTableNumber = orderedTable?.TableNumber;
 
-			
+
+			var customerName = applicationUser.Name;
+
+
+			//message to display in email
+			var employeeMessage = new Message(new string[] { applicationUser.Email }, "Booking Successful", $"\n\nDear {customerName},\n\n" +
+							 "Your reservation at 'Restoran' has been successful!\n\n" +
+							 $"Table Number: {orderedTableNumber}\n" +						 
+							 "If you have any questions or need assistance, please don't hesitate to reach out to us." + "\n\n" +
+							 "Best regards,\n" +
+							 "Restoran");
+			//sending email to the registered customer
+
+			_emailSender.SendEmail(employeeMessage);
+
+
 			return serviceResponse;
 
         }
@@ -256,8 +262,6 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.OrderServic
 			serviceResponse.Message = "All the Orders Of You!";
 			serviceResponse.Success = true;
 			return serviceResponse;
-
-
 
 		}
 

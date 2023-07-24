@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using EmailService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Restaurant_Reservation_Management_System_Api.Data;
+using Restaurant_Reservation_Management_System_Api.Dto.Auth;
 using Restaurant_Reservation_Management_System_Api.Dto.User.Reservation;
 using Restaurant_Reservation_Management_System_Api.Dto.User.Table;
 using Restaurant_Reservation_Management_System_Api.Model;
@@ -14,10 +16,13 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.Reservation
 
         private readonly IMapper _mapper;
 
-        public ReservationServicesUser(RestaurantDbContext context , IMapper mapper)
+		private readonly IEmailSender _emailSender;
+
+		public ReservationServicesUser(RestaurantDbContext context , IMapper mapper, IEmailSender emailSender)
         {
             _context = context;
             _mapper = mapper;   
+			_emailSender = emailSender;
 
         }
 
@@ -200,6 +205,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.User.Reservation
 					response.Message = "No Tables Available For this Slot";
 					return response;
 				}
+
+				
 
 				response.Data = newReservation;
 				response.Success = true;

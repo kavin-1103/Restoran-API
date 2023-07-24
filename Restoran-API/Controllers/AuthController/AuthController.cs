@@ -322,10 +322,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AuthControlle
 
 		public async Task<ActionResult<ServiceResponse<string>>> Register([FromBody] RegisterRequestDto request)
 		{
-			ServiceResponse<string> serviceResponse;
+			
 
-			if (ModelState.IsValid)
-			{
+			
 
 				var response = await _authService.RegisterUserAsync(request);
 
@@ -336,9 +335,9 @@ namespace Restaurant_Reservation_Management_System_Api.Controllers.AuthControlle
 
 				response.Success = false;
 				return BadRequest(response);
-			}
+			
 
-			return ValidationProblem(ModelState);
+			//return ValidationProblem(ModelState);
 
 
 		}
