@@ -59,6 +59,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 
 			var user = new ApplicationUser
 			{
+
 				UserName = registerRequestDto.Name,
 				Name = registerRequestDto.Name,
 				Email = registerRequestDto.Email,
@@ -67,46 +68,58 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Auth
 
 			//creating new application user with hashed password
 
-			var passwordHashed = await _userManager.CreateAsync(user, registerRequestDto.Password);
+			try
+			{
 
-			await _userManager.AddToRoleAsync(user, "Customer");
+				var passwordHashed = await _userManager.CreateAsync(user, registerRequestDto.Password);
 
-			OtpGenerator otpGenerator = new OtpGenerator();
-			string otp = otpGenerator.GenerateOtp();
+				await _userManager.AddToRoleAsync(user, "Customer");
 
-			DateTimeOffset indianTime = DateTimeOffset.UtcNow.ToOffset(TimeZoneInfo.FindSystemTimeZoneById("India Standard Time").BaseUtcOffset);
-			DateTimeOffset otpExpiration = indianTime.AddDays(1);
+				OtpGenerator otpGenerator = new OtpGenerator();
+				string otp = otpGenerator.GenerateOtp();
 
-			//added time for otp expiration
+				DateTimeOffset indianTime = DateTimeOffset.UtcNow.ToOffset(TimeZoneInfo.FindSystemTimeZoneById("India Standard Time").BaseUtcOffset);
+				DateTimeOffset otpExpiration = indianTime.AddDays(1);
 
-			user.Otp = otp;
-			user.OtpExpiration = otpExpiration;
+				//added time for otp expiration
 
-			// Save the changes to the database
-			await _context.SaveChangesAsync();
+				user.Otp = otp;
+				user.OtpExpiration = otpExpiration;
 
-			var employeeMessage = new Message(new string[] { registerRequestDto.Email }, "Verification", "\n\n" +
-					 "Thank you for registering with us. Your OTP is: " + otp + "\n\n" +
-					 "Please use this OTP to complete the registration process." + "\n\n" +
-					 "Best regards,\n" +
-					 "Restoran");
-			//sending email to the customer
+				// Save the changes to the database
+				await _context.SaveChangesAsync();
 
-			_emailSender.SendEmail(employeeMessage);
+				var employeeMessage = new Message(new string[] { registerRequestDto.Email }, "Verification", "\n\n" +
+						 "Thank you for registering with us. Your OTP is: " + otp + "\n\n" +
+						 "Please use this OTP to complete the registration process." + "\n\n" +
+						 "Best regards,\n" +
+						 "Restoran");
+				//sending email to the customer
 
-			response.Success = true;
-			response.Message = "Email Sent Successfully. Please check Your Mail for OTP";
-			return response;
-	
+				_emailSender.SendEmail(employeeMessage);
+
+				response.Success = true;
+				response.Message = "Email Sent Successfully. Please check Your Mail for OTP";
+				return response;
+			}
+			catch (Exception ex)
+			{
+				// Handle the exception for duplicate UserName
+				response.Success = false;
+				response.Message = "Username already exists"+ex.Message;
+				return response;
+			}
 
 
 
-		
-	}
 
-	//method to store in register customer model
 
-	private async Task StoreInRegisteredCustomer(ApplicationUser user)
+
+		}
+
+		//method to store in register customer model
+
+		private async Task StoreInRegisteredCustomer(ApplicationUser user)
         {
             var registeredCustomer = new RegisteredCustomer()
             {
