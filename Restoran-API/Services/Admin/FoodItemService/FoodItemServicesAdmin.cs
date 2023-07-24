@@ -21,7 +21,9 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
         }
 
 
+       
 
+        //service to return all the food items
         public async Task<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>> GetFoodItems()
         {
             var serviceResponse = new ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>();
@@ -41,6 +43,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
                 foreach (var foodItem in getAllFoodItems)
                 {
+
+                    
                     var category = await _context.MenuCategories.FindAsync(foodItem.CategoryId);
                     var categoryName = category.CategoryName;
                     var getFoodItemDto = new GetFoodItemDtoAdmin()
@@ -56,7 +60,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
                     getFoodItemDtoList.Add(getFoodItemDto);
                 }
 
-               // serviceResponse.Data = getAllFoodItems.Select(m => _mapper.Map<GetFoodItemDtoAdmin>(m)).ToList();
+              
                serviceResponse.Data = getFoodItemDtoList;
                 serviceResponse.Message = "All Food Items are Fetched";
                 serviceResponse.Success = true;
@@ -69,12 +73,14 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
             }
             return serviceResponse;
         }
+
+        //ADding New Food Item to the Food Item Model
         public async Task<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>> AddFoodItem(AddFoodItemDtoAdmin addFoodItemDtoAdmin)
         {
 
             var serviceResponse = new ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>();
-            //try
-            //{
+            try
+            {
                 var categoryExist = await _context.MenuCategories.FindAsync(addFoodItemDtoAdmin.CategoryId);
                 
                 if(categoryExist == null)
@@ -85,27 +91,52 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
                 }
 
-                // var FoodItemExist = await _context.FoodItems.FirstOrDefaultAsync(foodItem => foodItem.ItemName == addFoodItemDtoAdmin.ItemName);
-                //var FoodItemExist = await _context.FoodItems.FirstOrDefaultAsync(foodItem =>
-                //        string.Equals(foodItem.ItemName, addFoodItemDtoAdmin.ItemName, StringComparison.OrdinalIgnoreCase)
-                //        && string.Compare(foodItem.ItemName, addFoodItemDtoAdmin.ItemName, StringComparison.OrdinalIgnoreCase) == 0);
-                //if(FoodItemExist != null) 
-                //{
-                //    serviceResponse.Success = false;
-                //    serviceResponse.Message = "There is Already a Food Item With This Name";
-                //    return serviceResponse;
-                //}
+			    var existingFoodItems = await _context.FoodItems.ToListAsync();
 
+			    // Perform case-insensitive comparison locally
+			    var foodItemExist = existingFoodItems.FirstOrDefault(foodItem =>
+				    string.Equals(foodItem.ItemName, addFoodItemDtoAdmin.ItemName, StringComparison.OrdinalIgnoreCase));
 
-                var newFoodItem = _mapper.Map<FoodItem>(addFoodItemDtoAdmin);
+                //check for description and price 
+			    if (addFoodItemDtoAdmin.Price <= 0 && string.IsNullOrEmpty(addFoodItemDtoAdmin.Description))
+			    {
+				    serviceResponse.Success = false;
+				    serviceResponse.Message = "Both Description should not be empty and Price should be greater than 0";
+				    return serviceResponse;
+			    }
+                //check whether the food item alreadyeist
+			    if (foodItemExist != null)
+			    {
+				    serviceResponse.Success = false;
+				    serviceResponse.Message = "There is Already a Food Item With This Name";
+				    return serviceResponse;
+			    }
+
+                //check whether the description is empty or not
+			    if (string.IsNullOrEmpty(addFoodItemDtoAdmin.Description))
+			    {
+				    serviceResponse.Success = false;
+				    serviceResponse.Message = "Description should not be empty";
+				    return serviceResponse;
+			    }
+
+			    if (addFoodItemDtoAdmin.Price <= 0)
+			    {
+				    serviceResponse.Success = false;
+				    serviceResponse.Message = "Price should be greater than 0";
+				    return serviceResponse;
+			    }
+
+                //mapping AddfoodItemDto to FoodItem model
+			    var newFoodItem = _mapper.Map<FoodItem>(addFoodItemDtoAdmin);
 
                 _context.FoodItems.Add(newFoodItem);
 
                 await _context.SaveChangesAsync();
 
+                //getting all the food items
+
                 var allFoodItems = await _context.FoodItems.ToListAsync();
-
-
 
                 
                 var getFoodItemDtoList = _context.FoodItems.Select(m=>_mapper.Map<GetFoodItemDtoAdmin>(m)).ToList();
@@ -114,18 +145,20 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
                 serviceResponse.Data = getFoodItemDtoList;
                 serviceResponse.Success = true;
                 serviceResponse.Message = "Food Item Added Successfully";
-            //}
+            }
 
 
-            //catch (Exception ex)
-            //{
-            //    serviceResponse.Success = false;
-            //    serviceResponse.Message = ex.Message;
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
 
-            //}
+            }
             return serviceResponse;
 
         }
+
+        //service to update the food item
 
         public async Task<ServiceResponse<GetFoodItemDtoAdmin>> UpdateFoodItem(int id, AddFoodItemDtoAdmin addFoodItemDtoAdmin)
         {
@@ -133,6 +166,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
             var existingFoodItem = await _context.FoodItems.FindAsync(id);
 
+            //check if there is already a food item with the given id
             if (existingFoodItem == null)
             {
                 serviceResponse.Success = false;
@@ -155,7 +189,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<string>> DeleteFoodItem(int id)
+		//service to Delete the food item
+		public async Task<ServiceResponse<string>> DeleteFoodItem(int id)
         {
             var serviceResponse = new ServiceResponse<string>();
 
@@ -180,7 +215,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
 
                 }
-
+                 //food item with the given id is removed
                 _context.FoodItems.Remove(foodItemToDelete);
                 await _context.SaveChangesAsync();
 
@@ -202,7 +237,9 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
         }
 
-        public async Task<ServiceResponse<int>> GetFoodItemsCount()
+		//service to get the count of the food item
+
+		public async Task<ServiceResponse<int>> GetFoodItemsCount()
         {
 
             var serviceResponse = new ServiceResponse<int>();
@@ -224,6 +261,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 
 
         }
+
+		//service to get the food item by category
 
 		public async Task<ServiceResponse<IEnumerable<GetFoodItemDtoAdmin>>> GetFoodItemByCategory(int id)
 		{
@@ -255,7 +294,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.FoodItemSe
 						ItemName = foodItem.ItemName,
 						Description = foodItem.Description,
 						Price = foodItem.Price
-						// Add other properties if needed
+						
 					});
 
 				serviceResponse.Data = foodItemsDto;

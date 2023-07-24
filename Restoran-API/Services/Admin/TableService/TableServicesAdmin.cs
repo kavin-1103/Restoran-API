@@ -22,6 +22,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
         }
 
+        //service to get all the tables
         public async Task<ServiceResponse<IEnumerable<GetAllTableDtoAdmin>>> GetAllTables()
         {
             var serviceResponse = new ServiceResponse<IEnumerable<GetAllTableDtoAdmin>>();
@@ -31,6 +32,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
 
                 var tables = await _context.Tables.ToListAsync();
+
+                //selecting all the tables and mapping ti GetAllTable Dto
 
                 serviceResponse.Data = tables.Select(m => _mapper.Map<GetAllTableDtoAdmin>(m)).ToList();
 
@@ -52,7 +55,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
 
         }
-
+        //service to add a new table
         public async Task<ServiceResponse<List<GetAllTableDtoAdmin>>> AddTable(AddTableDtoAdmin addTableDtoAdmin)
         {
 
@@ -73,6 +76,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
                 };
 
+                //check for whether a table number exist
+
                 var tableNumberExist = await _context.Tables.AnyAsync(t => t.TableNumber == tableToAdd.TableNumber);
 
                 if(tableNumberExist)
@@ -82,12 +87,17 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
                     return serviceResponse;
                 }
+				if (tableToAdd.Capacity <= 0)
+				{
+					serviceResponse.Success = false;
+					serviceResponse.Message = "Table capacity should be greater than 0!";
+					return serviceResponse;
+				}
 
-                _context.Tables.Add(tableToAdd);
+				_context.Tables.Add(tableToAdd);
 
                 await _context.SaveChangesAsync();
 
-                //var tables = await  _context.Tables.ToListAsync();
 
                 serviceResponse.Data = await _context.Tables.Select(m => _mapper.Map<GetAllTableDtoAdmin>(m)).ToListAsync();
 
@@ -110,7 +120,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
         }
 
 
-
+        //service to update the table
         public async Task<ServiceResponse<GetAllTableDtoAdmin>> UpdateTable(int id,AddTableDtoAdmin addTableDtoAdmin)
         {
             var serviceResponse = new ServiceResponse<GetAllTableDtoAdmin>();
@@ -152,6 +162,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
                     return serviceResponse;
                 }
 
+                //get the table using id to delete
+
                 var tableToDelete = await _context.Tables.FindAsync(id);
                 if (tableToDelete == null)
                 {
@@ -183,7 +195,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.TableServi
 
         }
 
-
+        //service to get the total table count
 		public async Task<ServiceResponse<int>> GetTotalTableCount()
 		{
 			var serviceResponse = new ServiceResponse<int>();

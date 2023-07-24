@@ -18,6 +18,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
             _mapper = mapper;
         }  
 
+        //getting all the menu category
 
         public async Task<ServiceResponse<IEnumerable<GetMenuCategoryDtoAdmin>>> GetMenuCategory ()
         {
@@ -26,6 +27,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
             
             
                 var getAllMenuCategory = await _context.MenuCategories.ToListAsync();
+                
 
                 if (getAllMenuCategory == null)
                 {
@@ -34,6 +36,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
                     return serviceResponse;
 
                 }
+
+                //getting all the menu category and mapping to GetMenuCategoryDto
                 serviceResponse.Data = getAllMenuCategory.Select(m => _mapper.Map<GetMenuCategoryDtoAdmin>(m)).ToList();
                 serviceResponse.Message = "All Menu Categories are Fetched";
                 serviceResponse.Success = true;
@@ -48,6 +52,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
 
             try
             {
+                //check for the category should only be string
                 if(int.TryParse(addMenuCategoryDtoAdmin.CategoryName ,out _))
                 {
                     serviceResponse.Success = false;
@@ -55,14 +60,28 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
                     return serviceResponse;
 
                 }
+				var allMenuCategories = await _context.MenuCategories.ToListAsync();
+
+                //checking for whether the category exists
+
+				var categoryExist = allMenuCategories.FirstOrDefault(category =>
+					 string.Equals(category.CategoryName, addMenuCategoryDtoAdmin.CategoryName, StringComparison.OrdinalIgnoreCase));
+				if (categoryExist != null)
+				{
+					serviceResponse.Success = false;
+					serviceResponse.Message = "A Menu Category with this name already exists";
+					return serviceResponse;
+				}
 
 
 
-                var newMenuCategory = new MenuCategory()
+				var newMenuCategory = new MenuCategory()
                 {
                     CategoryName = addMenuCategoryDtoAdmin.CategoryName,
 
                 };
+
+                //Adding new Category to Menu Category
                 _context.MenuCategories.Add(newMenuCategory);
 
                 await _context.SaveChangesAsync();
@@ -88,6 +107,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
 
         }
 
+        //service to update the Menu Category
         public async Task<ServiceResponse<GetMenuCategoryDtoAdmin>> UpdateMenuCategory(int id, AddMenuCategoryDtoAdmin addMenuCategoryDtoAdmin)
         {
             var serviceResponse = new ServiceResponse<GetMenuCategoryDtoAdmin>();
@@ -104,6 +124,8 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
       
 
             await _context.SaveChangesAsync();
+
+            //mapping Menu Category to GetMenuCategoryDto
 
             serviceResponse.Data = _mapper.Map<GetMenuCategoryDtoAdmin>(existingMenuCategory);
             serviceResponse.Success = true;
@@ -137,6 +159,7 @@ namespace Restaurant_Reservation_Management_System_Api.Services.Admin.MenuCatego
 
 
                 }
+
 
                 _context.MenuCategories.Remove(menuCategoryToDelete);
                 await _context.SaveChangesAsync();
